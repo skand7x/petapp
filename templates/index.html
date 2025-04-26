@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Pet for Couples</title>
+    <style>
+        :root {
+            --primary: #ff7eb9;
+            --secondary: #7b5aed;
+            --background: #fffafe;
+            --text: #333333;
+            --success: #5ad16c;
+            --warning: #ffc107;
+            --danger: #ff5252;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--text);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .pet-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pet-visual {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .pet-face {
+            width: 180px;
+            height: 180px;
+            background-color: #ffdee9;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .pet-eyes {
+            position: absolute;
+            display: flex;
+            gap: 30px;
+            top: 60px;
+        }
+        
+        .pet-eye {
+            width: 30px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .pet-pupil {
+            width: 15px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            left: 7px;
+        }
+        
+        .pet-mouth {
+            width: 70px;
+            height: 30px;
+            border-radius: 0 0 40px 40px;
+            background-color: #ff96c0;
+            position: absolute;
+            top: 110px;
+        }
+        
+        .pet-ears {
+            position: absolute;
+            width: 100%;
+            top: -20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .pet-ear {
+            width: 40px;
+            height: 60px;
+            background-color: #ffdee9;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .stats-container {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .stat-bar {
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text);
+        }
+        
+        .stat-value {
+            font-weight: normal;
+        }
+        
+        .progress-bar {
+            height: 15px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-happiness {
+            background-color: var(--primary);
+        }
+        
+        .progress-health {
+            background-color: var(--success);
+        }
+        
+        .progress-hunger {
+            background-color: var(--warning);
+        }
+        
+        .progress-cleanliness {
+            background-color: var(--secondary);
+        }
+        
+        .action-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        .partner-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .partner-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .partner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .partner-name {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .streak {
+            font-size: 0.9rem;
+            padding: 3px 8px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-feed {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-clean {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-play {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-treat {
+            background-color: #ff9a76;
+            color: white;
+        }
+        
+        .btn-cuddle {
+            background-color: #b392ac;
+            color: white;
+        }
+        
+        .btn-exercise {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .couple-activities {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+        
+        .couple-activity-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .btn-couple {
+            background-color: #ff5a87;
+            color: white;
+        }
+        
+        .history-container {
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .history-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+        }
+        
+        .setup-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 12px;
+        }
+        
+        .btn-reset {
+            background-color: var(--danger);
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .hide {
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        /* Media queries for mobile responsiveness */
+        @media (max-width: 600px) {
+            .action-buttons,
+            .couple-activity-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Virtual Pet for Couples</h1>
+            <p>Take care of your virtual pet together!</p>
+        </div>
+
+        <div id="setup-container" class="setup-container">
+            <h2>Set Up Your Pet</h2>
+            <div class="form-group">
+                <label for="pet-name">Pet Name:</label>
+                <input type="text" id="pet-name" placeholder="Name your pet">
+            </div>
+            <div class="form-group">
+                <label for="pet-species">Pet Species:</label>
+                <input type="text" id="pet-species" placeholder="What kind of creature is it?">
+            </div>
+            <div class="form-group">
+                <label for="partner1-name">Partner 1 Name:</label>
+                <input type="text" id="partner1-name" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="partner2-name">Partner 2 Name:</label>
+                <input type="text" id="partner2-name" placeholder="Your partner's name">
+            </div>
+            <button id="save-setup" class="btn btn-primary">Start Taking Care of Your Pet</button>
+        </div>
+
+        <div id="pet-container" class="pet-container hide">
+            <h2 id="pet-name-display">Pet Name</h2>
+            <div class="pet-visual">
+                <div class="pet-face">
+                    <div class="pet-ears">
+                        <div class="pet-ear" style="transform: rotate(-30deg);"></div>
+                        <div class="pet-ear" style="transform: rotate(30deg);"></div>
+                    </div>
+                    <div class="pet-eyes">
+                        <div class="pet-eye">
+                            <div class="pet-pupil"></div>
+                        </div>
+                        <div class="pet-eye">
+                            <div class="pet-pupil"></div>
+                        </div>
+                    </div>
+                    <div class="pet-mouth"></div>
+                </div>
+            </div>
+            <p id="pet-species-display">Species</p>
+            
+            <div class="stats-container">
+                <div class="stat-bar">
+                    <div class="stat-label">
+                        <span>Happiness</span>
+                        <span class="stat-value" id="happiness-value">50/100</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress progress-happiness" style="width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-label">
+                        <span>Health</span>
+                        <span class="stat-value" id="health-value">50/100</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress progress-health" style="width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-label">
+                        <span>Hunger</span>
+                        <span class="stat-value" id="hunger-value">50/100</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress progress-hunger" style="width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-label">
+                        <span>Cleanliness</span>
+                        <span class="stat-value" id="cleanliness-value">50/100</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress progress-cleanliness" style="width: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="action-container" class="action-container hide">
+            <div class="partner-actions">
+                <h3 class="section-title">Individual Actions</h3>
+                
+                <div class="partner-section">
+                    <div class="partner-header">
+                        <span class="partner-name" id="partner1-display">Partner 1</span>
+                        <span class="streak" id="partner1-streak">Streak: 0 days</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-feed" data-partner="partner1" data-action="feed">Feed</button>
+                        <button class="btn btn-clean" data-partner="partner1" data-action="clean">Clean</button>
+                        <button class="btn btn-play" data-partner="partner1" data-action="play">Play</button>
+                        <button class="btn btn-treat" data-partner="partner1" data-action="treat">Treat</button>
+                        <button class="btn btn-cuddle" data-partner="partner1" data-action="cuddle">Cuddle</button>
+                        <button class="btn btn-exercise" data-partner="partner1" data-action="exercise">Exercise</button>
+                    </div>
+                </div>
+                
+                <div class="partner-section">
+                    <div class="partner-header">
+                        <span class="partner-name" id="partner2-display">Partner 2</span>
+                        <span class="streak" id="partner2-streak">Streak: 0 days</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-feed" data-partner="partner2" data-action="feed">Feed</button>
+                        <button class="btn btn-clean" data-partner="partner2" data-action="clean">Clean</button>
+                        <button class="btn btn-play" data-partner="partner2" data-action="play">Play</button>
+                        <button class="btn btn-treat" data-partner="partner2" data-action="treat">Treat</button>
+                        <button class="btn btn-cuddle" data-partner="partner2" data-action="cuddle">Cuddle</button>
+                        <button class="btn btn-exercise" data-partner="partner2" data-action="exercise">Exercise</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="couple-activities">
+                <h3 class="section-title">Couple Activities</h3>
+                <p>Do these activities together for bonus pet happiness!</p>
+                <div class="couple-activity-buttons">
+                    <button class="btn btn-couple" data-activity="walk">Go for a Walk</button>
+                    <button class="btn btn-couple" data-activity="groom">Groom Together</button>
+                    <button class="btn btn-couple" data-activity="train">Train Tricks</button>
+                </div>
+            </div>
+            
+            <div class="history-container">
+                <h3 class="section-title">Recent Activity</h3>
+                <div id="history-list">
+                    <!-- Activity history will be added here -->
+                </div>
+            </div>
+            
+            <button id="reset-pet" class="btn btn-reset">Reset Pet</button>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">Action completed!</div>
+    
+    <script>
+        // API endpoints (will need to be updated when deployed)
+        const API_BASE = 'https://petapp-o755.onrender.com'; // When deployed to GitHub Pages, this will be the base URL
+        const PET_ENDPOINT = API_BASE + '/api/pet';
+        const ACTION_ENDPOINT = API_BASE + '/api/action';
+        const COUPLE_ACTIVITY_ENDPOINT = API_BASE + '/api/couple-activity';
+        const RESET_ENDPOINT = API_BASE + '/api/reset';
+        
+        // DOM elements
+        const setupContainer = document.getElementById('setup-container');
+        const petContainer = document.getElementById('pet-container');
+        const actionContainer = document.getElementById('action-container');
+        const saveSetupBtn = document.getElementById('save-setup');
+        const resetPetBtn = document.getElementById('reset-pet');
+        const notification = document.getElementById('notification');
+
+        // Pet data
+        let petData = null;
+        
+        // Initialize the app
+        async function initApp() {
+            try {
+                const response = await fetch(PET_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch pet data');
+                }
+                
+                petData = await response.json();
+                updateUI(petData);
+                
+                // Show the pet if it's already set up
+                if (petData.name !== 'Fluffy' || 
+                    petData.partner1_name !== 'Partner 1' || 
+                    petData.partner2_name !== 'Partner 2') {
+                    setupContainer.classList.add('hide');
+                    petContainer.classList.remove('hide');
+                    actionContainer.classList.remove('hide');
+                } else {
+                    // Fill in any saved data
+                    document.getElementById('pet-name').value = petData.name;
+                    document.getElementById('pet-species').value = petData.species;
+                    document.getElementById('partner1-name').value = petData.partner1_name;
+                    document.getElementById('partner2-name').value = petData.partner2_name;
+                }
+                
+                // Set up polling to refresh data
+                setInterval(refreshPetData, 60000); // Refresh every minute
+            } catch (error) {
+                console.error('Error initializing app:', error);
+            }
+        }
+        
+        // Refresh pet data
+        async function refreshPetData() {
+            try {
+                const response = await fetch(PET_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch pet data');
+                }
+                
+                petData = await response.json();
+                updateUI(petData);
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            }
+        }
+        
+        // Update the UI with pet data
+        function updateUI(data) {
+            // Update pet info
+            document.getElementById('pet-name-display').textContent = data.name;
+            document.getElementById('pet-species-display').textContent = data.species;
+            
+            // Update stats
+            document.getElementById('happiness-value').textContent = `${Math.round(data.happiness)}/100`;
+            document.querySelector('.progress-happiness').style.width = `${data.happiness}%`;
+            
+            document.getElementById('health-value').textContent = `${Math.round(data.health)}/100`;
+            document.querySelector('.progress-health').style.width = `${data.health}%`;
+            
+            document.getElementById('hunger-value').textContent = `${Math.round(data.hunger)}/100`;
+            document.querySelector('.progress-hunger').style.width = `${data.hunger}%`;
+            
+            document.getElementById('cleanliness-value').textContent = `${Math.round(data.cleanliness)}/100`;
+            document.querySelector('.progress-cleanliness').style.width = `${data.cleanliness}%`;
+            
+            // Update partner names and streaks
