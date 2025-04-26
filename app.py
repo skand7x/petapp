@@ -1,4 +1,3 @@
-# app.py - Flask backend for Virtual Pet for Couples
 
 from flask import Flask, render_template, request, jsonify
 import json
@@ -53,14 +52,12 @@ def update_stats_based_on_time(pet_data):
     now = datetime.datetime.now()
     hours_passed = (now - last_updated).total_seconds() / 3600
     
-    # Decrease stats based on hours passed
     if hours_passed > 3:
-        decay_rate = min(hours_passed / 24 * 10, 50)  # Cap the decay
+        decay_rate = min(hours_passed / 24 * 10, 50)
         pet_data["hunger"] = max(0, pet_data["hunger"] - decay_rate)
         pet_data["cleanliness"] = max(0, pet_data["cleanliness"] - decay_rate)
         pet_data["happiness"] = max(0, pet_data["happiness"] - decay_rate)
         
-        # Health declines if other stats are too low
         if pet_data["hunger"] < 20 or pet_data["cleanliness"] < 20 or pet_data["happiness"] < 20:
             pet_data["health"] = max(0, pet_data["health"] - decay_rate / 2)
     
@@ -83,7 +80,6 @@ def update_pet():
     data = request.json
     pet_data = load_pet_data()
     
-    # Update pet name and species if provided
     if 'name' in data:
         pet_data['name'] = data['name']
     if 'species' in data:
@@ -104,17 +100,14 @@ def perform_action():
     pet_data = update_stats_based_on_time(pet_data)
     
     action_type = data['action']
-    partner = data['partner']  # 'partner1' or 'partner2'
+    partner = data['partner']
     
-    # Check if this is a couple activity
     is_couple_activity = data.get('couple_activity', False)
     
-    # Update last action time for the partner
     now = datetime.datetime.now()
     last_action_key = f"{partner}_last_action"
     streak_key = f"{partner}_streak"
     
-    # Calculate streak
     if pet_data[last_action_key]:
         last_action_time = datetime.datetime.fromisoformat(pet_data[last_action_key])
         days_since_last_action = (now - last_action_time).days
@@ -128,7 +121,6 @@ def perform_action():
     
     pet_data[last_action_key] = now.isoformat()
     
-    # Apply action effects
     if action_type == 'feed':
         pet_data['hunger'] = min(100, pet_data['hunger'] + 20)
         pet_data['happiness'] = min(100, pet_data['happiness'] + 5)
@@ -147,13 +139,11 @@ def perform_action():
         pet_data['health'] = min(100, pet_data['health'] + 15)
         pet_data['hunger'] = max(0, pet_data['hunger'] - 10)
     
-    # Bonus for couple activities
     if is_couple_activity:
         pet_data['couple_activities_completed'] += 1
         pet_data['happiness'] = min(100, pet_data['happiness'] + 10)
         pet_data['health'] = min(100, pet_data['health'] + 5)
     
-    # Record the action in history
     pet_data['action_history'].append({
         'timestamp': now.isoformat(),
         'partner': partner,
@@ -161,11 +151,9 @@ def perform_action():
         'couple_activity': is_couple_activity
     })
     
-    # Keep history limited to most recent 100 actions
     if len(pet_data['action_history']) > 100:
         pet_data['action_history'] = pet_data['action_history'][-100:]
     
-    # Calculate overall health based on other stats
     if pet_data['hunger'] < 20 or pet_data['cleanliness'] < 20:
         pet_data['health'] = max(0, pet_data['health'] - 5)
     
@@ -181,32 +169,26 @@ def couple_activity():
     
     activity = data['activity']
     
-    # Record who participated in the couple activity
     now = datetime.datetime.now()
     
-    # Apply strong bonuses for couple activities
     pet_data['happiness'] = min(100, pet_data['happiness'] + 30)
     pet_data['health'] = min(100, pet_data['health'] + 15)
     
-    # Different activities have different benefits
     if activity == 'walk':
         pet_data['health'] = min(100, pet_data['health'] + 10)
     elif activity == 'groom':
         pet_data['cleanliness'] = min(100, pet_data['cleanliness'] + 30)
     elif activity == 'train':
-        # Could add a skill or trick system here in the future
         pet_data['happiness'] = min(100, pet_data['happiness'] + 10)
     
     pet_data['couple_activities_completed'] += 1
     
-    # Record the action in history
     pet_data['action_history'].append({
         'timestamp': now.isoformat(),
         'action': f"couple_{activity}",
         'couple_activity': True
     })
     
-    # Keep history limited
     if len(pet_data['action_history']) > 100:
         pet_data['action_history'] = pet_data['action_history'][-100:]
     
@@ -217,14 +199,13 @@ def couple_activity():
 @app.route('/api/reset', methods=['POST'])
 def reset_pet():
     default_pet = get_default_pet()
-    
-    # Keep names from the current pet
     current_pet = load_pet_data()
     default_pet['partner1_name'] = current_pet.get('partner1_name', 'Partner 1')
     default_pet['partner2_name'] = current_pet.get('partner2_name', 'Partner 2')
-    
     save_pet_data(default_pet)
     return jsonify(default_pet)
 
+# Only needed if running locally
 if __name__ == '__main__':
-    app.run(debug=True)
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
